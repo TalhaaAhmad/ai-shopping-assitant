@@ -1,0 +1,118 @@
+// app/api/orders/route.ts (for App Router)
+// OR pages/api/orders.ts (for Pages Router)
+
+import { getAuth } from "@clerk/nextjs/server";
+import { NextRequest, NextResponse } from "next/server";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@/convex/_generated/api";
+
+// Initialize Convex client
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
+export async function POST(req: NextRequest) {
+  try {
+    // Get user authentication from Clerk
+    const { userId } = getAuth(req);
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Unauthorized - Please sign in" }, 
+        { status: 401 }
+      );
+    }
+
+    // Parse the request body
+    const body = await req.json();
+    const { productIds, totalAmount, shippingAddress, status } = body;
+
+    // Validate required fields
+    if (!productIds || !totalAmount || !shippingAddress) {
+      return NextResponse.json(
+        { error: "Missing required fields" }, 
+        { status: 400 }
+      );
+    }
+
+    // Create the order through Convex
+    const orderId = await convex.mutation(api.chats.createOrder, {
+      userId,
+      productIds,
+      totalAmount,
+      shippingAddress,
+      status: status || "pending",
+    });
+
+    console.log("✅ Order created successfully:", orderId);
+
+    return NextResponse.json({ 
+      success: true, 
+      orderId,
+      message: "Order created successfully" 
+    });
+
+  } catch (error) {
+    console.error("❌ Error creating order:", error);
+    
+    return NextResponse.json(
+      { 
+        error: "Failed to create order", 
+        details: error instanceof Error ? error.message : "Unknown error"
+      }, 
+      { status: 500 }
+    );
+  }
+}
+
+// For Pages Router (pages/api/orders.ts), use this instead:
+/*
+import { getAuth } from "@clerk/nextjs/server";
+import { NextApiRequest, NextApiResponse } from "next";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "@/convex/_generated/api";
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    const { userId } = getAuth(req);
+    
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized - Please sign in" });
+    }
+
+    const { productIds, totalAmount, shippingAddress, status } = req.body;
+
+    if (!productIds || !totalAmount || !shippingAddress) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const orderId = await convex.mutation(api.chats.createOrder, {
+      userId,
+      productIds,
+      totalAmount,
+      shippingAddress,
+      status: status || "pending",
+    });
+
+    console.log("✅ Order created successfully:", orderId);
+
+    res.status(200).json({ 
+      success: true, 
+      orderId,
+      message: "Order created successfully" 
+    });
+
+  } catch (error) {
+    console.error("❌ Error creating order:", error);
+    
+    res.status(500).json({ 
+      error: "Failed to create order", 
+      details: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
+}
+*/
