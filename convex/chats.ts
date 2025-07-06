@@ -1,45 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-export const createOrder = mutation({
-  args: {
-    userId: v.string(), // Accept userId as parameter
-    productIds: v.array(v.id("products")),
-    totalAmount: v.number(),
-    shippingAddress: v.object({
-      street: v.string(),
-      city: v.string(),
-      zip: v.string(),
-      country: v.string(),
-    }),
-    status: v.union(
-      v.literal("pending"),
-      v.literal("confirmed"),
-      v.literal("shipped"),
-      v.literal("delivered"),
-      v.literal("cancelled")
-    ),
-  },
-  handler: async (ctx, args) => {
-    // No need to get user identity from ctx.auth anymore
-    console.log("🔍 Creating order for user:", args.userId);
-    
-    const orderId = await ctx.db.insert("orders", {
-      userId: args.userId,
-      productIds: args.productIds,
-      totalAmount: args.totalAmount,
-      status: args.status,
-      createdAt: Date.now(),
-      shippingAddress: args.shippingAddress,
-    });
-    
-    console.log("✅ Order created with ID:", orderId);
-    return orderId;
-  },
-});
-
-
-
 
 export const createChat = mutation ({
   args: {
