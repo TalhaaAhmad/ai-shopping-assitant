@@ -23,10 +23,22 @@ export async function POST(req: NextRequest) {
 
     // Parse the request body
     const body = await req.json();
-    const { productIds, totalAmount, shippingAddress, status } = body;
+    const { 
+      orderIdFormatted, 
+      customer, 
+      email, 
+      total, 
+      items, 
+      shippingAddress, 
+      status, 
+      payment, 
+      fulfillment, 
+      trackingNumber, 
+      products 
+    } = body;
 
     // Validate required fields
-    if (!productIds || !totalAmount || !shippingAddress) {
+    if (!orderIdFormatted || !customer || !email || !total || !items || !shippingAddress || !products) {
       return NextResponse.json(
         { error: "Missing required fields" }, 
         { status: 400 }
@@ -35,11 +47,17 @@ export async function POST(req: NextRequest) {
 
     // Create the order through Convex
     const orderId = await convex.mutation(api.chats.createOrder, {
-      userId,
-      productIds,
-      totalAmount,
-      shippingAddress,
+      orderIdFormatted,
+      customer,
+      email,
       status: status || "pending",
+      payment: payment || "pending",
+      total,
+      items,
+      fulfillment: fulfillment || "Unfulfilled",
+      shippingAddress,
+      trackingNumber,
+      products,
     });
 
     console.log("✅ Order created successfully:", orderId);
@@ -84,18 +102,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: "Unauthorized - Please sign in" });
     }
 
-    const { productIds, totalAmount, shippingAddress, status } = req.body;
+    const { 
+      orderIdFormatted, 
+      customer, 
+      email, 
+      total, 
+      items, 
+      shippingAddress, 
+      status, 
+      payment, 
+      fulfillment, 
+      trackingNumber, 
+      products 
+    } = req.body;
 
-    if (!productIds || !totalAmount || !shippingAddress) {
+    if (!orderIdFormatted || !customer || !email || !total || !items || !shippingAddress || !products) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     const orderId = await convex.mutation(api.chats.createOrder, {
-      userId,
-      productIds,
-      totalAmount,
-      shippingAddress,
+      orderIdFormatted,
+      customer,
+      email,
       status: status || "pending",
+      payment: payment || "pending",
+      total,
+      items,
+      fulfillment: fulfillment || "Unfulfilled",
+      shippingAddress,
+      trackingNumber,
+      products,
     });
 
     console.log("✅ Order created successfully:", orderId);
