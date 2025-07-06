@@ -1,6 +1,66 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
+export const createOrder = mutation({
+  args: {
+    orderIdFormatted: v.string(),
+    customer: v.string(),
+    email: v.string(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("fulfilled"),
+      v.literal("cancelled")
+    ),
+    payment: v.union(
+      v.literal("pending"),
+      v.literal("paid"),
+      v.literal("refunded")
+    ),
+    total: v.number(),
+    items: v.number(),
+    fulfillment: v.union(
+      v.literal("Unfulfilled"),
+      v.literal("Shipped"),
+      v.literal("Delivered"),
+      v.literal("Cancelled")
+    ),
+    shippingAddress: v.string(),
+    trackingNumber: v.optional(v.string()),
+    products: v.array(
+      v.object({
+        name: v.string(),
+        quantity: v.number(),
+        price: v.number(),
+        sku: v.optional(v.string()),
+        brand: v.optional(v.string()),
+        productId: v.optional(v.id("products")),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    console.log("🔍 Creating order:", args.orderIdFormatted);
+    
+    const orderId = await ctx.db.insert("orders", {
+      orderIdFormatted: args.orderIdFormatted,
+      customer: args.customer,
+      email: args.email,
+      status: args.status,
+      payment: args.payment,
+      total: args.total,
+      items: args.items,
+      fulfillment: args.fulfillment,
+      shippingAddress: args.shippingAddress,
+      trackingNumber: args.trackingNumber,
+      products: args.products,
+    });
+    
+    console.log("✅ Order created with ID:", orderId);
+    return orderId;
+  },
+});
+
+
+
 
 export const createChat = mutation ({
   args: {
