@@ -43,7 +43,6 @@ const toolClient = new wxflows({
 
 // Retrieve the tools
 const tools = [
-  ...await toolClient.lcTools,
   updateOrderQuantitiesTool,
   updateShippingAddressTool,
   productSearchTool,
