@@ -7,7 +7,7 @@ import { ChatRequestBody, StreamMessageType } from "@/lib/types";
 import WelcomeMessage from "@/components/WelcomeMessage";
 import { createSSEParser } from "@/lib/SSEParser";
 import { MessageBubble } from "@/components/MessageBubble";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { getConvexClient } from "@/lib/convex";
 import { api } from "@/convex/_generated/api";
 
@@ -33,32 +33,6 @@ export default function ChatInterface({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamedResponse]);
-
-  const formatToolOutput = (output: unknown): string => {
-    if (typeof output === "string") return output;
-    return JSON.stringify(output, null, 2);
-  };
-
-  const formatTerminalOutput = (
-    tool: string,
-    input: unknown,
-    output: unknown
-  ) => {
-    const terminalHtml = `<div class="bg-[#1e1e1e] text-white font-mono p-2 rounded-md my-2 overflow-x-auto whitespace-normal max-w-[600px]">
-      <div class="flex items-center gap-1.5 border-b border-gray-700 pb-1">
-        <span class="text-red-500">●</span>
-        <span class="text-yellow-500">●</span>
-        <span class="text-green-500">●</span>
-        <span class="text-gray-400 ml-1 text-sm">~/${tool}</span>
-      </div>
-      <div class="text-gray-400 mt-1">$ Input</div>
-      <pre class="text-yellow-400 mt-0.5 whitespace-pre-wrap overflow-x-auto">${formatToolOutput(input)}</pre>
-      <div class="text-gray-400 mt-2">$ Output</div>
-      <pre class="text-green-400 mt-0.5 whitespace-pre-wrap overflow-x-auto">${formatToolOutput(output)}</pre>
-    </div>`;
-
-    return `---START---\n${terminalHtml}\n---END---`;
-  };
 
   /**
    * Processes a ReadableStream from the SSE response.
@@ -147,38 +121,18 @@ export default function ChatInterface({
               break;
 
             case StreamMessageType.ToolStart:
-              // Handle start of tool execution (e.g. API calls, file operations)
+              // Handle start of tool execution
               if ("tool" in message) {
                 setCurrentTool({
                   name: message.tool,
                   input: message.input,
                 });
-                fullResponse += formatTerminalOutput(
-                  message.tool,
-                  message.input,
-                  "Processing..."
-                );
-                setStreamedResponse(fullResponse);
               }
               break;
 
             case StreamMessageType.ToolEnd:
               // Handle completion of tool execution
-              if ("tool" in message && currentTool) {
-                // Replace the "Processing..." message with actual output
-                const lastTerminalIndex = fullResponse.lastIndexOf(
-                  '<div class="bg-[#1e1e1e]'
-                );
-                if (lastTerminalIndex !== -1) {
-                  fullResponse =
-                    fullResponse.substring(0, lastTerminalIndex) +
-                    formatTerminalOutput(
-                      message.tool,
-                      currentTool.input,
-                      message.output
-                    );
-                  setStreamedResponse(fullResponse);
-                }
+              if ("tool" in message) {
                 setCurrentTool(null);
               }
               break;
@@ -221,12 +175,9 @@ export default function ChatInterface({
       setMessages((prev) =>
         prev.filter((msg) => msg._id !== optimisticUserMessage._id)
       );
+      // Show error message in a simple format
       setStreamedResponse(
-        formatTerminalOutput(
-          "error",
-          "Failed to process message",
-          error instanceof Error ? error.message : "Unknown error"
-        )
+        `Error: ${error instanceof Error ? error.message : "Unknown error"}`
       );
     } finally {
       setIsLoading(false);
@@ -291,13 +242,11 @@ export default function ChatInterface({
                   : "bg-gray-100 text-gray-400"
               }`}
             >
-                          {/* <div className="absolute right-3 top-1/2 transform -translate-y-1/2"> */}
               <Sparkles className="w-5 h-5 text-gray-400" />
-            {/* </div> */}
             </Button>
           </div>
         </form>
       </footer>
     </main>
   );
-}
+                          }
