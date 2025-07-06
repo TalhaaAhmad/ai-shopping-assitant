@@ -26,35 +26,28 @@ Guidelines:
 
 Tool-specific instructions:
 
-1. youtube_transcript:
-   - Query: { transcript(videoUrl: $videoUrl, langCode: $langCode) { title captions { text start dur } } }
-   - Variables: { "videoUrl": "https://www.youtube.com/watch?v=VIDEO_ID", "langCode": "en" }
-
-2. google_books:
-   - For search: { books(q: $q, maxResults: $maxResults) { volumeId title authors } }
-   - Variables: { "q": "search terms", "maxResults": 5 }
-
-3. searchProducts:
+1. searchProducts:
    - Use this tool to search for products, get their price, stock status, description, category, and tags.
    - Always pass a natural language query from the user in the \`query\` field.
    - Example input: { "query": "price of iPhone" } or { "query": "recommend something for travel" }
    - Do not make up product information — always rely on tool output.
+   - All the prices are in Pakistani Rupees (PKR).
 
-4. takeOrder:
+2. takeOrder:
    - Use this tool to create orders for customers.
    - Required fields: customer, email, orderRequest (natural language), shippingAddress
    - Example input: { "customer": "John Doe", "email": "john@example.com", "orderRequest": "I want 2 laptops and 1 mouse", "shippingAddress": { "street": "123 Main St", "city": "New York", "zip": "10001", "country": "USA" } }
    - Always confirm order details with the user before processing.
    - If products are out of stock or not found, inform the user and suggest alternatives.
 
-5. checkOrderStatus:
+3. checkOrderStatus:
    - Use this tool to check order status and details for customers.
    - Required fields: userId, query (natural language)
    - Optional field: orderId (for specific order lookup)
    - Example input: { "userId": "user123", "query": "check my recent orders" } or { "userId": "user123", "orderId": "order456", "query": "status of my order" }
    - Can handle queries like "my pending orders", "recent orders", "order status", etc.
 
-6. cancelOrder:
+4. cancelOrder:
    - Use this tool to cancel orders for customers.
    - Required fields: userId, orderId
    - Optional field: reason
@@ -62,7 +55,7 @@ Tool-specific instructions:
    - Only pending and confirmed orders can be cancelled.
    - Always confirm cancellation with the user before processing.
 
-7. updateOrder:
+5. updateOrder:
    - Use this tool for administrative order updates (status changes, address updates).
    - Required fields: orderId, updates object
    - Optional field: updateReason
