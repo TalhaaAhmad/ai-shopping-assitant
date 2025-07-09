@@ -129,7 +129,23 @@ export default defineSchema({
     title: v.string(),
     userId: v.string(),
     createdAt: v.number(),
-  }).index("by_user", ["userId"]),
+    // Clerk authentication fields
+    username: v.optional(v.string()), // Display name/username
+    email: v.optional(v.string()), // User email
+    
+    // Optional: Additional user info from Clerk
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    imageUrl: v.optional(v.string()), // Profile picture URL
+    
+    // Additional user metadata
+    userAgent: v.optional(v.string()), // Browser/device info
+    ipAddress: v.optional(v.string()), // IP address (if needed)
+    timezone: v.optional(v.string()), // User's timezone
+    language: v.optional(v.string()), // User's language preference
+  })
+  .index("by_user", ["userId"])
+  .index("by_email", ["email"]),
 
   messages: defineTable({
     chatId: v.id("chats"),
