@@ -1,70 +1,12 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-export const createOrder = mutation({
-  args: {
-    orderIdFormatted: v.string(),
-    customer: v.string(),
-    email: v.string(),
-    status: v.union(
-      v.literal("pending"),
-      v.literal("fulfilled"),
-      v.literal("cancelled")
-    ),
-    payment: v.union(
-      v.literal("pending"),
-      v.literal("paid"),
-      v.literal("refunded")
-    ),
-    total: v.number(),
-    items: v.number(),
-    fulfillment: v.union(
-      v.literal("Unfulfilled"),
-      v.literal("Shipped"),
-      v.literal("Delivered"),
-      v.literal("Cancelled")
-    ),
-    shippingAddress: v.string(),
-    trackingNumber: v.optional(v.string()),
-    products: v.array(
-      v.object({
-        name: v.string(),
-        quantity: v.number(),
-        price: v.number(),
-        sku: v.optional(v.string()),
-        brand: v.optional(v.string()),
-        productId: v.optional(v.id("products")),
-      })
-    ),
-  },
-  handler: async (ctx, args) => {
-    console.log("🔍 Creating order:", args.orderIdFormatted);
-    
-    const orderId = await ctx.db.insert("orders", {
-      orderIdFormatted: args.orderIdFormatted,
-      customer: args.customer,
-      email: args.email,
-      status: args.status,
-      payment: args.payment,
-      total: args.total,
-      items: args.items,
-      fulfillment: args.fulfillment,
-      shippingAddress: args.shippingAddress,
-      trackingNumber: args.trackingNumber,
-      products: args.products,
-    });
-    
-    console.log("✅ Order created with ID:", orderId);
-    return orderId;
-  },
-});
-
-
-
-
 export const createChat = mutation ({
   args: {
     title: v.string(),
+    userAgent: v.optional(v.string()),
+    timezone: v.optional(v.string()),
+    language: v.optional(v.string()),
   },
   handler: async (ctx, args) =>  {
     console.log("🔍 [CHATS] Attempting to get user identity...");
@@ -80,6 +22,14 @@ export const createChat = mutation ({
     const chat = await ctx.db.insert("chats", {
       title: args.title,
       userId: identity.subject,
+      username: typeof identity.username === 'string' ? identity.username : undefined,
+      email: typeof identity.email === 'string' ? identity.email : undefined,
+      firstName: typeof (identity as any).givenName === 'string' ? (identity as any).givenName : undefined,
+      lastName: typeof (identity as any).familyName === 'string' ? (identity as any).familyName : undefined,
+      imageUrl: typeof (identity as any).pictureUrl === 'string' ? (identity as any).pictureUrl : undefined,
+      userAgent: args.userAgent,
+      timezone: args.timezone,
+      language: args.language,
       createdAt: Date.now(),
     });
 
