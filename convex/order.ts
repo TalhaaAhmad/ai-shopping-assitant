@@ -124,3 +124,21 @@ export const bulkUpdateStatus = mutation({
     );
   }
 });
+
+export const updateOrderDelivery = mutation({
+  args: {
+    id: v.id("orders"),
+    fulfillment: fulfillmentStatus,
+    trackingNumber: v.optional(v.string()),
+    payment: paymentStatus, // <-- not optional!
+    returnStatus: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      fulfillment: args.fulfillment,
+      trackingNumber: args.trackingNumber,
+      payment: args.payment, // <-- always present
+      returnStatus: args.returnStatus,
+    });
+  },
+});
