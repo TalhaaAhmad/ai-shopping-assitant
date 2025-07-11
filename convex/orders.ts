@@ -42,7 +42,9 @@ const fulfillmentStatus = v.union(
   v.literal("Unfulfilled"),
   v.literal("Shipped"),
   v.literal("Delivered"),
-  v.literal("Cancelled")
+  v.literal("Cancelled"),
+  v.literal("Returned"),
+  v.literal("Refunded")
 );
 
 // Create a new order
