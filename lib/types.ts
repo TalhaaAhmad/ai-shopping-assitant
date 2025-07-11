@@ -78,7 +78,7 @@ export interface Order {
   payment: "pending" | "paid" | "refunded";
   total: number;
   items: number;
-  fulfillment: "Unfulfilled" | "Shipped" | "Delivered" | "Cancelled";
+  fulfillment: "Unfulfilled" | "Shipped" | "Delivered" | "Cancelled" | "Returned" | "Refunded";
   shippingAddress: string;
   trackingNumber?: string;
   products: Array<{
@@ -87,3 +87,25 @@ export interface Order {
     price: number;
   }>;
 }
+
+export type ComplaintStatus =
+  | "draft"
+  | "submitted"
+  | "under_review"
+  | "approved"
+  | "rejected"
+  | "resolved"
+  | "escalated";
+
+export type Complaint = {
+  complaintId: string;
+  orderId: string;
+  customerEmail: string;
+  complaintType: string;
+  description: string;
+  status: ComplaintStatus;
+  urgency: string;
+  internalNotes?: string;
+  createdAt: number;
+  // Add other fields as needed
+};
