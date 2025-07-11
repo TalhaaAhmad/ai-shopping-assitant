@@ -80,6 +80,57 @@ export const getDefaultProductValues = () => ({
   updatedAt: Date.now(),
 });
 
+
+// Complaint status types
+export const complaintStatus = v.union(
+  v.literal("draft"),
+  v.literal("submitted"),
+  v.literal("under_review"),
+  v.literal("approved"),
+  v.literal("rejected"),
+  v.literal("resolved"),
+  v.literal("escalated")
+);
+
+export const complaintType = v.union(
+  v.literal("return"),
+  v.literal("exchange"),
+  v.literal("refund"),
+  v.literal("damaged_item"),
+  v.literal("wrong_item"),
+  v.literal("missing_item"),
+  v.literal("defective_item"),
+  v.literal("late_delivery"),
+  v.literal("poor_quality"),
+  v.literal("warranty_claim"),
+  v.literal("billing_issue"),
+  v.literal("shipping_issue"),
+  v.literal("customer_service"),
+  v.literal("other")
+);
+
+export const resolutionType = v.union(
+  v.literal("full_refund"),
+  v.literal("partial_refund"),
+  v.literal("store_credit"),
+  v.literal("replacement"),
+  v.literal("exchange"),
+  v.literal("repair"),
+  v.literal("compensation"),
+  v.literal("apology"),
+  v.literal("policy_explanation"),
+  v.literal("no_action")
+);
+
+export const urgencyLevel = v.union(
+  v.literal("low"),
+  v.literal("medium"),
+  v.literal("high"),
+  v.literal("critical")
+);
+
+
+
 // Product search and filter utilities
 export const createProductSlug = (name: string): string => {
   return name
@@ -121,7 +172,9 @@ export const fulfillmentStatus = v.union(
   v.literal("Unfulfilled"),
   v.literal("Shipped"),
   v.literal("Delivered"),
-  v.literal("Cancelled")
+  v.literal("Cancelled"),
+  v.literal("Returned"),
+  v.literal("Refunded")
 );
 
 export default defineSchema({
@@ -292,6 +345,7 @@ export default defineSchema({
     fulfillment: fulfillmentStatus,
     shippingAddress: v.string(),
     trackingNumber: v.optional(v.string()),
+    returnStatus: v.optional(v.string()), // Add this field
     products: v.array(
       v.object({
         name: v.string(),
@@ -318,6 +372,55 @@ export default defineSchema({
     name: v.string(),
     createdAt: v.number(),
   }).index("by_clerkUserId", ["clerkUserId"]),
+
+
+  complaints: defineTable({
+    complaintId: v.string(),
+    orderId: v.string(),
+    customerEmail: v.string(),
+    complaintType: complaintType,
+    description: v.string(),
+    affectedProducts: v.array(v.string()),
+    hasEvidence: v.boolean(),
+    preferredResolution: v.optional(resolutionType),
+    suggestedResolution: resolutionType,
+    status: complaintStatus,
+    urgency: urgencyLevel,
+    resolutionDetails: v.string(),
+    compensationAmount: v.number(),
+    
+    // Resolution tracking
+    resolvedAt: v.optional(v.number()),
+    resolutionNotes: v.optional(v.string()),
+    assignedTo: v.optional(v.string()), // Staff member handling the complaint
+    
+    // Communication tracking
+    customerNotified: v.optional(v.boolean()),
+    internalNotes: v.optional(v.string()),
+    
+    // Evidence tracking
+    evidenceUrls: v.optional(v.array(v.string())), // URLs to uploaded evidence
+    
+    // Timestamps
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    
+    // Admin fields
+    createdBy: v.optional(v.string()),
+    updatedBy: v.optional(v.string()),
+  })
+    .index("by_order", ["orderId"])
+    .index("by_customer", ["customerEmail"])
+    .index("by_status", ["status"])
+    .index("by_type", ["complaintType"])
+    .index("by_urgency", ["urgency"])
+    .index("by_created", ["createdAt"])
+    .index("by_complaint_id", ["complaintId"])
+    .searchIndex("search_complaints", {
+      searchField: "description",
+      filterFields: ["complaintType", "status", "urgency"]
+    }),
+
 
   counters: defineTable({
     name: v.string(),   // e.g., "order"
