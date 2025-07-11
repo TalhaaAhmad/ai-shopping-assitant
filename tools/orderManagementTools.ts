@@ -273,7 +273,7 @@ export const updateOrderTool = new DynamicStructuredTool({
     orderIdFormatted: z.string().describe("Formatted order ID to update (#ORD1000)"),
     updates: z.object({
       status: z.enum(["pending", "fulfilled", "cancelled"]).optional(),
-      fulfillment: z.enum(["Unfulfilled", "Shipped", "Delivered", "Cancelled"]).optional(),
+      fulfillment: z.enum(["Unfulfilled", "Shipped", "Delivered", "Cancelled", "Returned", "Refunded"]).optional(),
       shippingAddress: z.string().optional(),
       payment: z.enum(["pending", "paid", "refunded"]).optional(),
       trackingNumber: z.string().optional(),
@@ -352,6 +352,7 @@ Customer: ${order.customer}
 Email: ${order.email}
 Status: ${order.status}
 Fulfillment: ${order.fulfillment}
+Tracking Number: ${order.trackingNumber}
 Payment: ${order.payment}
 Total: $${order.total.toFixed(2)}
 Items: ${order.items}
