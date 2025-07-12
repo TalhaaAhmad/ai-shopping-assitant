@@ -154,5 +154,3 @@ Pull requests and issues are welcome! Please open an issue to discuss major chan
 MIT
 
 ---
-
-If you want to add badges, screenshots, or more advanced usage, let me know!
