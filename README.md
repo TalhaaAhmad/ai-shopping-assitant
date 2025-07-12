@@ -17,6 +17,14 @@ A modern, full-stack AI-powered shopping assistant platform with a customer-faci
 
 ---
 
+## 🖼️ Architecture Diagram
+
+![Project Architecture](architecture.png)
+
+*High-level architecture: Users interact with the Next.js app (customer UI & admin dashboard), which authenticates via Clerk, uses shared components, and communicates with Convex backend and modular tools. AI models are used for chat and product search.*
+
+---
+
 ## 🗂️ Folder Structure
 
 ```
@@ -45,7 +53,7 @@ youtube-ai-agent/
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/ai-shopping-assitant.git
+   git clone https://github.com/yourusername/youtube-ai-agent.git
    cd youtube-ai-agent
    ```
 
